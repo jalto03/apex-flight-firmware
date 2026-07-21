@@ -1,0 +1,51 @@
+/* 
+Loop does NOT have sampling rate, variables will likely change, hysterieses not implemented
+*/
+
+Start:
+	state = PAD
+	Log and sensors zeroed
+	Deadband_high, Deadband_Low = something, something
+
+
+Main Loop:
+	read sensors
+	IF state == BURN || CONTROL_LOOP || DESCENT:
+		log sensors
+		log variables
+	
+	IF state == pad && launch_button == pressed:
+		igniter_pin = 1
+		Small Delay
+		igniter_pin = 0
+		state = BURN
+		Small Delay // For accelration to start getting to speed
+		
+	ELIF state == BURN:
+		IF accel is near gravity:
+			state = CONTROL_LOOP
+	
+	ELIF state = CONTROL_LOOP:
+		// Calculate error
+		predicted_apogee = calculate_prdicted_apogee(sensors);
+		error = predicted_apogee - target_apogee
+		
+		// Bang Bang Logic
+		If airbrakes = 0 && error above deadband:
+			airbrakes = 1
+		
+		IF airbrakes = 1 && error below deadband:
+			airbrakes = 0
+			
+		// Checks if apogee is reached
+		If velocity <= 0:
+			airbrakes = 0
+			state = DESCENT
+			
+	ELIF state == DESCENT:
+		IF altitude near zero && velocity near zero:
+			state = LANDED
+	
+	ELIF state == LANDED:
+		Stop logging
+		play buzzer?
